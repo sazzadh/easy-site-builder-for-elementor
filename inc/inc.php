@@ -149,6 +149,13 @@ class Inc {
 
 	public static function builder_query($place){
 		$the_id = 0;
+		$id_search = 0;
+		$id_404 = 0;
+		$id_home = 0;
+		$id_front = 0;
+		$id_page = 0;
+		
+
 		// The Query.
 		$args = array(
 			'post_type' => self::POST_NAME,
@@ -172,13 +179,72 @@ class Inc {
 				//if($this->user_rolse_check($user_roles, get_the_ID())){
 					if(is_search()){
 
-						if( is_array($display_not) && in_array("special-search", $display_not) ){
-							$the_id = 0;
-						}
 						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
 							$the_id = get_the_ID();
 						}elseif (is_array($display_on) && in_array('special-search', $display_on)) {
+							$id_search = get_the_ID();
+						}
+
+						if( is_array($display_not) && in_array("special-search", $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
+					
+					elseif(is_404()){
+						
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
 							$the_id = get_the_ID();
+						}elseif (is_array($display_on) && in_array('special-404', $display_on)) {
+							$id_404 = get_the_ID();
+						}
+
+						if( is_array($display_not) && in_array("special-404", $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
+
+					elseif(is_home()){
+
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
+							$the_id = get_the_ID();
+						}elseif (is_array($display_on) && in_array('special-blog', $display_on)) {
+							$id_home = get_the_ID();
+						}
+
+						if( is_array($display_not) && in_array("special-blog", $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
+
+					elseif(is_front_page()){
+
+						
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
+							$the_id = get_the_ID();
+						}elseif (is_array($display_on) && in_array('special-front', $display_on)) {
+							$id_front = get_the_ID();
+						}
+
+						if( is_array($display_not) && in_array("special-front", $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
+
+					elseif(is_page()){
+
+						
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
+							$the_id = get_the_ID();
+						}elseif (is_array($display_on) && in_array('special-page', $display_on)) {
+							$id_page = get_the_ID();
+						}
+
+						if( is_array($display_not) && in_array("special-page", $display_not) ){
+							$the_id = 0;
 						}
 						
 					}
@@ -188,7 +254,25 @@ class Inc {
 		// Restore original Post Data.
 		wp_reset_postdata();
 
-		return $the_id;
+		if(is_search() && $id_search){
+			return $id_search;
+		}
+		elseif(is_404() && $id_404){
+			return $id_404;
+		}
+		elseif(is_home() && $id_home){
+			return $id_home;
+		}
+		elseif(is_front_page() && $id_front){
+			return $id_front;
+		}
+		elseif(is_page() && $id_page){
+			return $id_page;
+		}
+		else{
+			return $the_id;
+		}
+
 	}
 
 

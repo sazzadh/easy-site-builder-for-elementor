@@ -200,7 +200,7 @@ class AdminMetabox{
 
             <div class="esbfe_repeater_item_hiden" style="display:none;">
                 <select hiden_name="<?php echo esc_attr($field_id); ?>[rand_no]" id="<?php echo esc_attr($field_id); ?>">
-                    <?php $this->mb_field_helper_display_options($page_templates, $item_value); ?>
+                    <?php $this->mb_field_helper_display_options($page_templates, ''); ?>
                 </select>
                 <button class="esbfe_repeater_remove button" type="button">Remove</button>
             </div>
@@ -318,7 +318,7 @@ class AdminMetabox{
 
             <div class="esbfe_repeater_item_hiden" style="display:none;">
                 <select hiden_name="<?php echo esc_attr($field_id); ?>[rand_no]" id="<?php echo esc_attr($field_id); ?>">
-                    <?php $this->mb_field_UserRoles_helper_select_options($item_value); ?>
+                    <?php $this->mb_field_UserRoles_helper_select_options(''); ?>
                 </select>
                 <button class="esbfe_repeater_remove button" type="button">Remove</button>
             </div>
