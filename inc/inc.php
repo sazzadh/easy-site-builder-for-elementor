@@ -36,6 +36,7 @@ class Inc {
 		add_action('get_footer', [$this, '_renderSiteFooter'], 11);
 		add_filter( 'template_include', [$this, 'template_include'], 99 );
 		add_action( 'elementor/elements/categories_registered', [ $this, 'register_widget_categories' ], 2 );
+		add_action( 'easy_site_builder_template_load', [ $this, 'template_load' ] );
 		//$this->builder_query('header');
 	}
 
@@ -138,12 +139,19 @@ class Inc {
 
 
 	public function template_include($template){
+		$the_tmpl_id = $this->builder_query('theme_template');
 
-		if(is_page()){
+		if ($the_tmpl_id) {
 			$template = plugin_dir_path( __FILE__ ) . 'templates/template.php';
 		}
 
 		return $template;
+	}
+
+	public function template_load(){
+
+		$the_tmpl_id = $this->builder_query('theme_template');
+		echo \Elementor\Plugin::$instance->frontend->get_builder_content_for_display($the_tmpl_id, false);
 	}
 
 
@@ -154,6 +162,7 @@ class Inc {
 		$id_home = 0;
 		$id_front = 0;
 		$id_page = 0;
+		$id_singular = 0;
 		
 
 		// The Query.
@@ -248,6 +257,22 @@ class Inc {
 						}
 						
 					}
+
+					elseif(!is_singular('page') && is_singular()){
+
+						$saved_cpt_string = get_post_type( self::getCurrentPageId() )."|all";
+						
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
+							$the_id = get_the_ID();
+						}elseif (is_array($display_on) && in_array('post|all', $display_on)) {
+							$id_singular = get_the_ID();
+						}
+
+						if( is_array($display_not) && in_array($saved_cpt_string, $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
 				//}
 			}
 		}
@@ -269,6 +294,9 @@ class Inc {
 		elseif(is_page() && $id_page){
 			return $id_page;
 		}
+		elseif(is_singular() && $id_singular && !is_singular('page')){
+			return $id_singular;
+		}
 		else{
 			return $the_id;
 		}
@@ -276,10 +304,26 @@ class Inc {
 	}
 
 
-	public function user_rolse_check($meta, $post_id){
-		if(in_array("subscriber", $meta)){
+	public static function getCurrentPageId(){
+		global $wp_query;
 
-		}
+        if (!is_main_query()) {
+            return 0;
+        }
+
+        if (is_home() && !is_front_page()) {
+            return (int)get_option('page_for_posts');
+        } elseif (!is_home() && is_front_page()) {
+            return (int)get_option('page_on_front');
+        } elseif (function_exists('is_shop') && is_shop()) {
+            return wc_get_page_id('shop');
+        } elseif (is_privacy_policy()) {
+            return (int)get_option('wp_page_for_privacy_policy');
+        } elseif (!empty($wp_query->post->ID)) {
+            return (int)$wp_query->post->ID;
+        } else {
+            return 0;
+        }
 	}
 
 }

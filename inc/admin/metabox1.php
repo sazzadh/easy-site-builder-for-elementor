@@ -173,6 +173,10 @@ class AdminMetabox{
                        $('.esbfe_display_not_form_section').css('display', 'none');
                        $('.esbfe_user_roles_form_section').css('display', 'none');
                     }
+
+                    if(value.val() === 'theme_template' ){
+                        $('option[value="basic-global"]').remove();
+                    }
                });
 
             });
@@ -191,7 +195,7 @@ class AdminMetabox{
                     foreach( $values as $item_key => $item_value ){ ?>
                 <div class="esbfe_repeater_item">
                     <select name="<?php echo esc_attr($field_id); ?>[<?php echo $item_key; ?>]" id="<?php echo esc_attr($field_id); ?>">
-                        <?php $this->mb_field_helper_display_options($page_templates, $item_value); ?>
+                        <?php $this->mb_field_helper_display_options($page_templates, $item_value, $post->ID); ?>
                     </select>                    
                     <button class="esbfe_repeater_remove button" type="button">Remove</button>
                 </div>
@@ -200,7 +204,7 @@ class AdminMetabox{
 
             <div class="esbfe_repeater_item_hiden" style="display:none;">
                 <select hiden_name="<?php echo esc_attr($field_id); ?>[rand_no]" id="<?php echo esc_attr($field_id); ?>">
-                    <?php $this->mb_field_helper_display_options($page_templates, ''); ?>
+                    <?php $this->mb_field_helper_display_options($page_templates, '', $post->ID); ?>
                 </select>
                 <button class="esbfe_repeater_remove button" type="button">Remove</button>
             </div>
@@ -225,11 +229,14 @@ class AdminMetabox{
         <?php
     }
 
-    function mb_field_helper_display_options($page_templates, $item_value){
+    function mb_field_helper_display_options($page_templates, $item_value, $post_id = 0){
+        $type = get_post_meta( $post_id, 'esbfe_type', true );
         ?>
         <option value="">Select</option>
         <optgroup label="Basic">
-            <option value="basic-global" <?php echo selected( $item_value, 'basic-global' ); ?>>Entire Website</option>
+            <?php if($type != 'theme_template'): ?>
+                <option value="basic-global" <?php echo selected( $item_value, 'basic-global' ); ?>>Entire Website</option>
+            <?php endif; ?>
             <option value="basic-singulars" <?php echo selected( $item_value, 'basic-singulars' ); ?>>All Singulars</option>
             <option value="basic-archives" <?php echo selected( $item_value, 'basic-archives' ); ?>>All Archives</option>
         </optgroup>
@@ -258,6 +265,7 @@ class AdminMetabox{
             // Get all post types
             $args       = array(
                 'public' => true,
+                'publicly_queryable' => true,
             );
             $post_types = get_post_types( $args, 'objects' );
 
@@ -274,8 +282,10 @@ class AdminMetabox{
                 ){
                     ?>
                     <optgroup label="<?php echo esc_html( $labels->name ); ?>">
-                        <option value="<?php echo esc_attr( $name ); ?>|all">All <?php echo esc_html( $labels->name ); ?></option>
-                        <option value="<?php echo esc_attr( $name ); ?>|archive">All <?php echo esc_html( $labels->name ); ?> archive</option>
+                        <?php $the_static_vlaue = esc_attr( $name ).'|all'; ?>
+                        <option value="<?php echo $the_static_vlaue; ?>" <?php echo selected( $item_value, $the_static_vlaue ); ?>>All <?php echo esc_html( $labels->name ); ?></option>
+                        <?php $the_static_vlaue = esc_attr( $name ).'|archive'; ?>
+                        <option value="<?php echo $the_static_vlaue; ?>" <?php echo selected( $item_value, $the_static_vlaue ); ?>>All <?php echo esc_html( $labels->name ); ?> archive</option>
                         <?php
                             $taxonomy_objects = get_object_taxonomies( $name, 'objects' );
                             //print_r( $taxonomy_objects);
@@ -283,8 +293,9 @@ class AdminMetabox{
                                 if($taxonomy_object->show_ui ){
                                     $tax_name = $taxonomy_object->name;
                                     $tax_label = $taxonomy_object->label;
+                                    $the_static_vlaue = esc_attr( $name ).'|taxarchive|'.esc_attr( $tax_name );
                                     ?>
-                                        <option value="<?php echo esc_attr( $name ); ?>|taxarchive|<?php echo esc_attr( $tax_name ); ?>">
+                                        <option value="<?php echo $the_vlaue; ?>" <?php echo selected( $item_value, $the_static_vlaue ); ?>>
                                             All <?php echo esc_attr( $tax_label ); ?>
                                         </option>
                                     <?php
