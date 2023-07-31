@@ -295,7 +295,7 @@ class AdminMetabox{
                                     $tax_label = $taxonomy_object->label;
                                     $the_static_vlaue = esc_attr( $name ).'|taxarchive|'.esc_attr( $tax_name );
                                     ?>
-                                        <option value="<?php echo $the_vlaue; ?>" <?php echo selected( $item_value, $the_static_vlaue ); ?>>
+                                        <option value="<?php echo $the_static_vlaue; ?>" <?php echo selected( $item_value, $the_static_vlaue ); ?>>
                                             All <?php echo esc_attr( $tax_label ); ?>
                                         </option>
                                     <?php

@@ -163,6 +163,8 @@ class Inc {
 		$id_front = 0;
 		$id_page = 0;
 		$id_singular = 0;
+		$id_archive = 0;
+		$id_tax = 0;
 		
 
 		// The Query.
@@ -190,10 +192,10 @@ class Inc {
 
 						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
 							$the_id = get_the_ID();
-						}elseif (is_array($display_on) && in_array('special-search', $display_on)) {
+						}
+						if (is_array($display_on) && in_array('special-search', $display_on)) {
 							$id_search = get_the_ID();
 						}
-
 						if( is_array($display_not) && in_array("special-search", $display_not) ){
 							$the_id = 0;
 						}
@@ -204,10 +206,10 @@ class Inc {
 						
 						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
 							$the_id = get_the_ID();
-						}elseif (is_array($display_on) && in_array('special-404', $display_on)) {
+						}
+						if (is_array($display_on) && in_array('special-404', $display_on)) {
 							$id_404 = get_the_ID();
 						}
-
 						if( is_array($display_not) && in_array("special-404", $display_not) ){
 							$the_id = 0;
 						}
@@ -218,10 +220,10 @@ class Inc {
 
 						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
 							$the_id = get_the_ID();
-						}elseif (is_array($display_on) && in_array('special-blog', $display_on)) {
+						}
+						if (is_array($display_on) && in_array('special-blog', $display_on)) {
 							$id_home = get_the_ID();
 						}
-
 						if( is_array($display_not) && in_array("special-blog", $display_not) ){
 							$the_id = 0;
 						}
@@ -229,14 +231,13 @@ class Inc {
 					}
 
 					elseif(is_front_page()){
-
 						
 						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
 							$the_id = get_the_ID();
-						}elseif (is_array($display_on) && in_array('special-front', $display_on)) {
+						}
+						if (is_array($display_on) && in_array('special-front', $display_on)) {
 							$id_front = get_the_ID();
 						}
-
 						if( is_array($display_not) && in_array("special-front", $display_not) ){
 							$the_id = 0;
 						}
@@ -244,14 +245,13 @@ class Inc {
 					}
 
 					elseif(is_page()){
-
 						
 						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
 							$the_id = get_the_ID();
-						}elseif (is_array($display_on) && in_array('special-page', $display_on)) {
+						}
+						if (is_array($display_on) && in_array('special-page', $display_on)) {
 							$id_page = get_the_ID();
 						}
-
 						if( is_array($display_not) && in_array("special-page", $display_not) ){
 							$the_id = 0;
 						}
@@ -264,15 +264,50 @@ class Inc {
 						
 						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
 							$the_id = get_the_ID();
-						}elseif (is_array($display_on) && in_array('post|all', $display_on)) {
+						}
+						if (is_array($display_on) && in_array($saved_cpt_string, $display_on)) {
 							$id_singular = get_the_ID();
 						}
-
 						if( is_array($display_not) && in_array($saved_cpt_string, $display_not) ){
 							$the_id = 0;
 						}
 						
 					}
+
+					elseif(is_tax() || is_category() || is_tag()){
+
+						$saved_cpt_string = 'post|taxarchive|category';
+						$saved_cpt_string = self::getCurrentTaxConditionalString();
+						
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
+							$the_id = get_the_ID();
+						}
+						if (is_array($display_on) && in_array($saved_cpt_string, $display_on)) {
+							$id_tax = get_the_ID();
+						}
+						if( is_array($display_not) && in_array($saved_cpt_string, $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
+
+					elseif(is_archive()){
+
+						$saved_cpt_string = get_post_type( self::getCurrentPageId() )."|archive";
+						
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
+							$the_id = get_the_ID();
+						}
+						if (is_array($display_on) && in_array($saved_cpt_string, $display_on)) {
+							$id_archive = get_the_ID();
+						}
+						if( is_array($display_not) && in_array($saved_cpt_string, $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
+
+					
 				//}
 			}
 		}
@@ -296,6 +331,12 @@ class Inc {
 		}
 		elseif(is_singular() && $id_singular && !is_singular('page')){
 			return $id_singular;
+		}
+		elseif((is_tax()  || is_category() || is_tag()) && $id_tax){
+			return $id_tax;
+		}
+		elseif(is_archive() && $id_archive){
+			return $id_archive;
 		}
 		else{
 			return $the_id;
@@ -324,6 +365,20 @@ class Inc {
         } else {
             return 0;
         }
+	}
+
+	public static function getCurrentTaxConditionalString(){
+		global $wp_query;
+
+        if (!is_main_query()) {
+            return 0;
+        }
+
+		$get_queried_object = get_queried_object();
+		$taxonomy = get_taxonomy( $get_queried_object->taxonomy );
+		$posttype = $taxonomy->object_type;
+
+		return $posttype[0]."|taxarchive|".$get_queried_object->taxonomy;
 	}
 
 }
