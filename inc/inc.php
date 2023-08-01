@@ -108,6 +108,7 @@ class Inc {
 
 	function _renderSiteHeader(){
 		$header_tmpl_id = $this->builder_query('header');
+		//$header_tmpl_id = 142;
 		if ($header_tmpl_id) {
             require plugin_dir_path( __FILE__ ) . 'templates/header.php';
             $templates   = [];
@@ -165,6 +166,9 @@ class Inc {
 		$id_singular = 0;
 		$id_archive = 0;
 		$id_tax = 0;
+		$id_date = 0;
+		$id_author = 0;
+		$id_shop = 0;
 		
 
 		// The Query.
@@ -244,6 +248,20 @@ class Inc {
 						
 					}
 
+					elseif(function_exists('is_shop') && is_shop()){
+
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
+							$the_id = get_the_ID();
+						}
+						if (is_array($display_on) && in_array('special-woo-shop', $display_on)) {
+							$id_shop = get_the_ID();
+						}
+						if( is_array($display_not) && in_array("special-woo-shop", $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
+
 					elseif(is_page()){
 						
 						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
@@ -269,6 +287,34 @@ class Inc {
 							$id_singular = get_the_ID();
 						}
 						if( is_array($display_not) && in_array($saved_cpt_string, $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
+
+					elseif(is_date()){
+						
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
+							$the_id = get_the_ID();
+						}
+						if (is_array($display_on) && in_array('special-date', $display_on)) {
+							$id_date = get_the_ID();
+						}
+						if( is_array($display_not) && in_array("special-date", $display_not) ){
+							$the_id = 0;
+						}
+						
+					}
+
+					elseif(is_author()){
+						
+						if (is_array($display_on) && in_array("basic-global", $display_on) ) {
+							$the_id = get_the_ID();
+						}
+						if (is_array($display_on) && in_array('special-author', $display_on)) {
+							$id_author = get_the_ID();
+						}
+						if( is_array($display_not) && in_array("special-author", $display_not) ){
 							$the_id = 0;
 						}
 						
@@ -326,11 +372,20 @@ class Inc {
 		elseif(is_front_page() && $id_front){
 			return $id_front;
 		}
+		elseif(function_exists('is_shop') && is_shop() && $id_shop){
+			return $id_shop;
+		}
 		elseif(is_page() && $id_page){
 			return $id_page;
 		}
 		elseif(is_singular() && $id_singular && !is_singular('page')){
 			return $id_singular;
+		}
+		elseif(is_date() && $id_date){
+			return $id_date;
+		}
+		elseif(is_author() && $id_author){
+			return $id_author;
 		}
 		elseif((is_tax()  || is_category() || is_tag()) && $id_tax){
 			return $id_tax;
